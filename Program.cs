@@ -17,20 +17,21 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// 🌐 CORS (opcional para desarrollo)
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        policy =>
-        {
-            policy.AllowAnyOrigin()
-                  .AllowAnyMethod()
-                  .AllowAnyHeader();
-        });
+    options.AddPolicy("AllowFrontend", builder =>
+    {
+        builder
+            .WithOrigins("http://127.0.0.1:5500", "http://localhost:5500", "https://tu-frontend.netlify.app")
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
 });
 
-var app = builder.Build();
 
+var app = builder.Build();
+// Usar la policy
+app.UseCors("AllowFrontend");
 // Middleware de desarrollo
 if (app.Environment.IsDevelopment())
 {
