@@ -22,16 +22,16 @@ namespace VeterinaryAPI.Controllers
         [HttpPost("registrar")]
         public async Task<IActionResult> Registrar([FromBody] CrearUsuarioDto dto)
         {
-            if (await _context.Usuarios.AnyAsync(u => u.Username == dto.NombreUsuario))
+            if (await _context.Usuarios.AnyAsync(u => u.Username == dto.Username))
             {
                 return BadRequest("El nombre de usuario ya existe.");
             }
 
             var usuario = new Usuario
             {
-                Username = dto.NombreUsuario,  // ← CAMBIO: era dto.Username
-                PasswordHash = HashPassword(dto.Contraseña),  // ← CAMBIO: era dto.Password
-                Role = "employee"  // ← CAMBIO: rol fijo porque el frontend no lo envía
+                Username = dto.Username,  // ← VOLVIÓ AL ORIGINAL
+                PasswordHash = HashPassword(dto.Password),  // ← VOLVIÓ AL ORIGINAL
+                Role = dto.Role ?? "employee"  // ← Usar el rol o "employee" por defecto
             };
 
             _context.Usuarios.Add(usuario);
@@ -42,9 +42,9 @@ namespace VeterinaryAPI.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Username == dto.NombreUsuario);  // ← CAMBIO: era dto.NombreUsuario
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Username == dto.NombreUsuario);
 
-            if (usuario == null || usuario.PasswordHash != HashPassword(dto.Contraseña))  // ← CAMBIO: era dto.Contraseña
+            if (usuario == null || usuario.PasswordHash != HashPassword(dto.Contraseña))
             {
                 return Unauthorized("Credenciales incorrectas.");
             }
@@ -52,20 +52,20 @@ namespace VeterinaryAPI.Controllers
             return Ok(new
             {
                 mensaje = "Login exitoso",
-                UserId = usuario.Id,  // ← AGREGADO: para el frontend
+                UserId = usuario.Id,
                 Username = usuario.Username,
                 Role = usuario.Role,
-                Token = $"token_{usuario.Id}_{DateTime.Now.Ticks}"  // ← AGREGADO: token simple
+                Token = $"token_{usuario.Id}_{DateTime.Now.Ticks}"
             });
         }
 
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
+        public IActionResult Logout()  // ← QUITADO async
         {
-            return Ok("Logout exitoso");  // ← SIMPLIFICADO
+            return Ok("Logout exitoso");
         }
 
-        [HttpGet("ping")]  // ← AGREGADO: para despertar la API
+        [HttpGet("ping")]
         public IActionResult Ping()
         {
             return Ok("API funcionando");
