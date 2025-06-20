@@ -14,13 +14,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// CORS
+// CORS SÚPER PERMISIVO (permite todo)
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", builder =>
+    options.AddDefaultPolicy(policy =>
     {
-        builder
-            .WithOrigins("http://127.0.0.1:5500", "http://localhost:5500", "https://veterinariaproject.netlify.app")
+        policy
+            .AllowAnyOrigin()
             .AllowAnyMethod()
             .AllowAnyHeader();
     });
@@ -35,7 +35,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowFrontend");
+app.UseCors();  // ← CAMBIO: sin nombre de política
 app.UseAuthorization();
 app.MapControllers();
 
